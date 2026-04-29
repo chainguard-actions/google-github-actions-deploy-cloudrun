@@ -1,6 +1,12 @@
 # google-github-actions/deploy-cloudrun
 
-Hardened GitHub Action by [Chainguard](https://www.chainguard.dev).
+Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/google-github-actions/deploy-cloudrun](https://github.com/google-github-actions/deploy-cloudrun).
+
+## Versions
+
+| Version | Tag | Upstream commit |
+|---------|-----|-----------------|
+| v3 | [`v3`](https://github.com/chainguard-actions/deploy-cloudrun/tree/v3) | — |
 
 ## Privacy
 
