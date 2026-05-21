@@ -8,7 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
-| v3 | [`v3`](https://github.com/chainguard-actions/google-github-actions--deploy-cloudrun/tree/v3) | — |
+| v3 | [`v3`](https://github.com/chainguard-actions/google-github-actions-deploy-cloudrun/tree/v3) | — |
 
 ## Privacy
 
