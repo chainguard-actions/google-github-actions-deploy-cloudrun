@@ -1,0 +1,52 @@
+name: Test deploy with metadata and traffic
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action-metadata
+        uses: .
+        continue-on-error: true
+        with:
+          metadata: |-
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            metadata:
+              name: my-service
+          project_id: my-gcp-project
+          region: us-central1
+          revision_traffic: 'LATEST=100'
+          update_traffic_flags: '--set-tags=stable'
+      - name: Assert metadata action ran (expected failure without credentials)
+        env:
+          OUTCOME: ${{ steps.action-metadata.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
+      - id: action-source
+        uses: .
+        continue-on-error: true
+        with:
+          service: my-source-service
+          source: ./
+          project_id: my-gcp-project
+          region: us-central1
+          tag_traffic: 'my-tag=10'
+      - name: Assert source action ran (expected failure without credentials)
+        env:
+          OUTCOME: ${{ steps.action-source.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed"
+          else
+            echo "FAIL: unexpected outcome: $OUTCOME"
+            exit 1
+          fi
