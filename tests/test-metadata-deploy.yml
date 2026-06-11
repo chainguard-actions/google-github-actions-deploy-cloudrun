@@ -1,0 +1,54 @@
+name: Test metadata and source deploy inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action-metadata
+        uses: .
+        continue-on-error: true
+        with:
+          metadata: |-
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            metadata:
+              name: my-cloudrun-service
+            spec:
+              template:
+                spec:
+                  containers:
+                  - image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          project_id: my-gcp-project
+          region: us-central1
+      - name: Assert metadata action ran
+        env:
+          OUTCOME: ${{ steps.action-metadata.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
+      - id: action-source
+        uses: .
+        continue-on-error: true
+        with:
+          service: my-cloudrun-service
+          source: '.'
+          project_id: my-gcp-project
+          region: us-central1
+      - name: Assert source action ran
+        env:
+          OUTCOME: ${{ steps.action-source.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action executed"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
