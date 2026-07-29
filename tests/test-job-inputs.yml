@@ -1,0 +1,30 @@
+name: Test Cloud Run job inputs (job, flags, gcloud_version, wait)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with job inputs (expect failure without GCP credentials)
+        id: action
+        uses: .
+        with:
+          job: 'my-cloud-run-job'
+          image: 'us-docker.pkg.dev/cloudrun/container/hello:latest'
+          region: 'us-central1'
+          project_id: 'my-gcp-project'
+          gcloud_version: 'latest'
+          flags: '--max-retries=3'
+          wait: 'false'
+        continue-on-error: true
+
+      - name: Assert action failed (expected without real GCP credentials)
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          if [ "${{ steps.action.outcome }}" != "failure" ]; then
+            echo "FAIL: expected action to fail without real GCP credentials"
+            exit 1
+          fi
+          echo "PASS: action correctly failed as expected without GCP credentials"

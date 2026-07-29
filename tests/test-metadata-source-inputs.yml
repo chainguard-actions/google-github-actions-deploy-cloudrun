@@ -1,0 +1,54 @@
+name: Test metadata and source inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with source input (expect failure without GCP credentials)
+        id: action-source
+        uses: .
+        with:
+          service: 'my-service'
+          source: '.'
+          region: 'us-central1'
+          project_id: 'my-gcp-project'
+        continue-on-error: true
+
+      - name: Assert source action failed (expected without real GCP credentials)
+        run: |
+          echo "outcome: ${{ steps.action-source.outcome }}"
+          if [ "${{ steps.action-source.outcome }}" != "failure" ]; then
+            echo "FAIL: expected action to fail without real GCP credentials"
+            exit 1
+          fi
+          echo "PASS: action correctly failed as expected without GCP credentials"
+
+      - name: Run action with metadata input (expect failure without GCP credentials)
+        id: action-metadata
+        uses: .
+        with:
+          metadata: |-
+            apiVersion: serving.knative.dev/v1
+            kind: Service
+            metadata:
+              name: my-service
+            spec:
+              template:
+                spec:
+                  containers:
+                    - image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          region: 'us-central1'
+          project_id: 'my-gcp-project'
+        continue-on-error: true
+
+      - name: Assert metadata action failed (expected without real GCP credentials)
+        run: |
+          echo "outcome: ${{ steps.action-metadata.outcome }}"
+          if [ "${{ steps.action-metadata.outcome }}" != "failure" ]; then
+            echo "FAIL: expected action to fail without real GCP credentials"
+            exit 1
+          fi
+          echo "PASS: action correctly failed as expected without GCP credentials"

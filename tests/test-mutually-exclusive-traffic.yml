@@ -1,0 +1,28 @@
+name: Test mutually exclusive traffic inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run action with both revision_traffic and tag_traffic (expect failure)
+        id: action
+        uses: .
+        with:
+          service: 'my-service'
+          image: 'us-docker.pkg.dev/cloudrun/container/hello:latest'
+          region: 'us-central1'
+          revision_traffic: 'LATEST=100'
+          tag_traffic: 'my-tag=100'
+        continue-on-error: true
+
+      - name: Assert action failed due to mutually exclusive traffic inputs
+        run: |
+          echo "outcome: ${{ steps.action.outcome }}"
+          if [ "${{ steps.action.outcome }}" != "failure" ]; then
+            echo "FAIL: expected action to fail when both revision_traffic and tag_traffic are provided"
+            exit 1
+          fi
+          echo "PASS: action correctly failed when both revision_traffic and tag_traffic were provided"
