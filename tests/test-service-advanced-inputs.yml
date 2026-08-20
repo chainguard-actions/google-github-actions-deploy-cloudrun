@@ -1,4 +1,4 @@
-name: Test metadata-based deploy
+name: Test service advanced inputs (flags, suffix, timeout, labels, secrets, project_id, gcloud_version)
 on:
   workflow_dispatch:
 jobs:
@@ -10,17 +10,19 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          metadata: |-
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            metadata:
-              name: my-service
-              namespace: my-gcp-project
-            spec:
-              template:
-                spec:
-                  containers:
-                    - image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          service: my-service
+          image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          project_id: my-gcp-project
+          region: us-central1
+          suffix: v1
+          timeout: 10m
+          labels: |-
+            managed-by=test
+            env=ci
+          secrets: |-
+            MY_SECRET=my-secret-name:latest
+          flags: '--concurrency=10'
+          gcloud_version: 'latest'
       - name: Assert action ran or failed gracefully (no GCP credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}

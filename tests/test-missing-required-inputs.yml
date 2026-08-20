@@ -1,4 +1,4 @@
-name: Test Cloud Run job deploy (no credentials)
+name: Test missing required inputs validation
 on:
   workflow_dispatch:
 jobs:
@@ -11,19 +11,19 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          job: my-test-job
           image: us-docker.pkg.dev/cloudrun/container/hello:latest
-          region: us-central1
+          # Intentionally omitting service, job, and metadata to trigger validation error
 
-      - name: Assert action failed gracefully (no GCP credentials for job deploy)
+      - name: Assert action failed due to missing required inputs
         env:
           OUTCOME: ${{ steps.action.outcome }}
         run: |
           echo "outcome: $OUTCOME"
           if [ "$OUTCOME" = "failure" ]; then
-            echo "PASS: action failed gracefully (no GCP credentials available)"
+            echo "PASS: action failed as expected (no service/job/metadata provided)"
           elif [ "$OUTCOME" = "success" ]; then
-            echo "PASS: action succeeded unexpectedly (real GCP credentials present)"
+            echo "FAIL: action should have failed without service/job/metadata"
+            exit 1
           else
             echo "FAIL: unexpected outcome '$OUTCOME'"
             exit 1

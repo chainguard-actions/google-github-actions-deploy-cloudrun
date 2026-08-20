@@ -1,4 +1,4 @@
-name: Test metadata-based deploy
+name: Test source-based deploy
 on:
   workflow_dispatch:
 jobs:
@@ -10,17 +10,11 @@ jobs:
         uses: .
         continue-on-error: true
         with:
-          metadata: |-
-            apiVersion: serving.knative.dev/v1
-            kind: Service
-            metadata:
-              name: my-service
-              namespace: my-gcp-project
-            spec:
-              template:
-                spec:
-                  containers:
-                    - image: us-docker.pkg.dev/cloudrun/container/hello:latest
+          service: my-service
+          source: '.'
+          project_id: my-gcp-project
+          region: us-central1
+          gcloud_component: 'alpha'
       - name: Assert action ran or failed gracefully (no GCP credentials)
         env:
           OUTCOME: ${{ steps.action.outcome }}
